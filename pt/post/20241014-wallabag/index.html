@@ -1,0 +1,187 @@
+<!doctype html><html lang=pt dir=auto><head><meta charset=UTF-8><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><meta name=mdpath content="post/20241014-wallabag/index.pt.md"><title>offtopic do lucasew</title>
+<script src=https://unpkg.com/htmx.org@2.0.4 integrity=sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+ crossorigin=anonymous></script></head><body hx-boost=true><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/sakura.css/css/sakura.css type=text/css><style>nav{display:flex;justify-content:space-between}aside{border-bottom:1px solid gray}nav>div>a{margin-left:1rem}</style><header><nav><div><a href=/pt/home/><b>offtopic do lucasew</b></a></div><div><a href=/pt/post/>Publicações</a>
+<a href=/pt/post/20241014-wallabag/>🇧🇷</a></div></nav></header><hr><main><h1>Wallabag no NixOS</h1><i>Também disponível em:
+<a target=_blank href=https://blog-do-lucao.vercel.app/post/20241014-wallabag/>[1]</a></i><br><p>Eae pessoal!!! Quanto tempo!</p><p>Depois de muito tempo, decidi desempoeirar o blog com o side project do momento.</p><p>Ultimanente to com um interesse em autocustodiar algumas coisas. Uma delas é o Pocket.
+Não pelo Pocket ser ruim ou ter melhorado tanto que piorou mas porque eu queria tentar algo diferente.</p><p>Tempo atrás achei esse tal de <a href=https://wallabag.org/ target=_blank rel=external>Wallabag</a>, que é basicamente um Pocket/Instapaper selfhosted feito em Symphony/PHP.</p><p>Fim de semana tava meio de saco cheio e não tinha nada programado pra sair então resolvi meter o louco e tirar um pouco a ferrugem da minha config NixOS.</p><p>A config do NixOS nem tava ruim, só que eu cheguei num ponto que eu não tava precisando mais mexer. Tava usando branch stable então basicamente não
+tinha nenhum ajuste que precisava fazer entre bumps então tava bem mó paz mesmo, não tinha porque mexer.</p><p>Basicamente esse projeto aconteceu nas seguintes fases:</p><ul><li>Fazer o wallabag funcionar como módulo NixOS</li><li>Criar o vhost</li><li>Importar os artigos do Pocket de do Instapaper</li><li>Configurar os clientes (principalmente o app Android)</li></ul><h1 id=fazendo-funcionar>Fazendo funcionar</h1><p>Porque faz todo sentido preguiçoso, eu não comecei do zero, <del>roubei código</del> tomei inspiração no trabalho
+de <a href=https://cce.whatthefuck.computer/updates#20231106T181545.910122 target=_blank rel=external>outra pessoa</a>
+e tive que fazer uns ajustes pra minha situação, também fazendo umas adaptações para ficar no padrão de módulos do nixpkgs.</p><p>Meu requisito era que funcionasse numa rede interna Tailscale, não tenho intenção de expor pra Internet, o que
+simplifica muito as coisas, até certo ponto.</p><p>Depois de vários ajustes o código do módulo ficou
+<a href=https://github.com/lucasew/nixcfg/blob/854cda49af1800a3e481f617fcdad7d29d6499c3/nix/nodes/common/services/wallabag.nix#L1 target=_blank rel=external>assim</a>.</p><p>Uma coisa que eu gostei bastante do resultado, além de funcionar, é claro, é que eu fiz o <code>console</code> do Wallabag
+(basicamente um php-artisan da vida) já entrar no usuário do serviço certo então o script em sí já sobe no usuário certo.</p><p>Uma coisa que trouxe dificuldade é que o Wallabag reclama se falta alguma config no parameters.yaml então tem que especificar
+todas as chaves nem que seja com null.</p><h1 id=criar-o-vhost>Criar o vhost</h1><p>De início eu usei o nginx pra criar um vhost HTTP como eu já fazia em basicamente todos os serviços mas o
+Wallabag é muito xarope com HTTPS então eu tinha que achar um jeito.</p><p>O app oficial se nega a funcionar sobre HTTP mesmo que eu já tenha a criptografia do wireguard já segurando as
+pontas. É HTTPS ou GTFO. Eu podia usar SSL autoassinado mas fiquei com preguiça de fazer tudo na mão. Ou eu
+automatizo o processo ou deixo quieto.</p><p>Nessa me dei conta que o Tailscale consegue criar certificados TLS mesmo que não esteja usando Tailscale
+Funnel. É um tanto imperativo usando o daemon do sistema mas eu já tinha uma carta na manga que era só
+adaptar pra funcionar nesse caso.</p><p>O <a href=https://github.com/lucasew/ts-proxy target=_blank rel=external>ts-proxy</a> é basicamente um proxy reverso que expõe uma porta
+HTTP como um serviço ou nó em uma rede Tailscale. Com MagicDNS já ganho DNS de graça e com aquela
+manha do TLS eu já consigo fazer HTTPS na rede local.</p><p>Depois de uns ajustes isso foi entregue na versão 0.5.0. Como eu fiz cagada na release lancei a
+0.5.1 arrumando. Não tem novidade nenhuma, só correção da minha cagada pra fazer release.</p><p>Agora com um módulo simples consigo subir um ts-proxy para cada serviço que eu quero expor,
+TLS fica atrás de um enable, ou flag se chamar o ts-proxy direto, token pra autorizar o nó
+é provisionado com sops-nix. Na primeira vez tem que autorizar o serviço no dashboard do
+Tailscale e depois tudo funciona sem ter que expor pra Internet e com certificado let&rsquo;s
+encrypt depois de um warmup de uns 10s se o TLS tiver ativado.</p><p>Com esse ajuste do HTTPS o aplicativo oficial, que eu tentei patchear sem sucesso pra aceitar HTTP,
+funcionou sem problemas e começou finalmente a sincronizar.</p><h1 id=importar-artigos-do-pocket-e-do-instapaper>Importar artigos do Pocket e do Instapaper</h1><p>É nessa parte que filho chora e mãe não vê, porque eu sou usuário Pocket desde 2015 e nessa conta
+tem uma quantidade imoral de artigos. Quanto imoral? Imoral assim:</p><p><img src=/post/20241014-wallabag/power_guido.png alt="tenho tanto artigo na minha conta do pocket que pra exportar os dados tive que apelar"></p><p>Eu tinha começado a importar os artigos antes de configurar HTTPS então o fluxo OAuth pra importar do
+Pocket não funcionava e o importador do Instapaper funciona com um arquivo que o serviço exporta.
+Por causa da quantidade de artigos o import travava o Wallabag inteiro e dava em Gateway Time Out.</p><p>Fiz na mão. Basicamente usei uma lib de cliente do Wallabag em Python e respectivamente um parser
+de CSV do Instapaper e um export pra JSON continuável do Pocket.</p><p>Primeiro dumpei o Pocket com esse script:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># cria um app oauth lá</span>
+</span></span><span style=display:flex><span>consumer_key <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;CHANGEME&#34;</span>
+</span></span><span style=display:flex><span>access_token <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;CHANGEME&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> pocket <span style=color:#f92672>import</span> Pocket
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> pathlib <span style=color:#f92672>import</span> Path
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> json
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>pocket <span style=color:#f92672>=</span> Pocket(consumer_key, access_token)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>output_dir <span style=color:#f92672>=</span> Path(<span style=color:#e6db74>&#39;.&#39;</span>)<span style=color:#f92672>.</span>parent <span style=color:#f92672>/</span> <span style=color:#e6db74>&#34;pocket_fetched&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>index_gen</span>():
+</span></span><span style=display:flex><span>    offset <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>    batch_size <span style=color:#f92672>=</span> <span style=color:#ae81ff>30</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>while</span> <span style=color:#66d9ef>True</span>:
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>yield</span> offset
+</span></span><span style=display:flex><span>        offset <span style=color:#f92672>+=</span> batch_size
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> offset <span style=color:#f92672>in</span> index_gen():
+</span></span><span style=display:flex><span>    file_name <span style=color:#f92672>=</span> output_dir <span style=color:#f92672>/</span> <span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;fetch_</span><span style=color:#e6db74>{</span>offset<span style=color:#e6db74>:</span><span style=color:#e6db74>04</span><span style=color:#e6db74>}</span><span style=color:#e6db74>.json&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> file_name<span style=color:#f92672>.</span>exists():
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>continue</span>
+</span></span><span style=display:flex><span>    print(<span style=color:#e6db74>f</span><span style=color:#e6db74>&#34;fetch offset=</span><span style=color:#e6db74>{</span>offset<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
+</span></span><span style=display:flex><span>    res, _headers <span style=color:#f92672>=</span> pocket<span style=color:#f92672>.</span>get(
+</span></span><span style=display:flex><span>        images<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        videos<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        tags<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        rediscovery<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        annotations<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        authors<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        itemOptics<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        meta<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        posts<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        total<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        forceaccount<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>        offset<span style=color:#f92672>=</span>offset,
+</span></span><span style=display:flex><span>        count<span style=color:#f92672>=</span><span style=color:#ae81ff>30</span>,  <span style=color:#75715e># max count per request according to api docs</span>
+</span></span><span style=display:flex><span>        state<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;all&#39;</span>,
+</span></span><span style=display:flex><span>        sort<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;newest&#39;</span>,
+</span></span><span style=display:flex><span>        detailType<span style=color:#f92672>=</span><span style=color:#e6db74>&#39;complete&#39;</span>,
+</span></span><span style=display:flex><span>    )
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> res<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;list&#39;</span>) <span style=color:#f92672>is</span> <span style=color:#f92672>not</span> <span style=color:#66d9ef>None</span> <span style=color:#f92672>and</span> len(res[<span style=color:#e6db74>&#39;list&#39;</span>]) <span style=color:#f92672>==</span> <span style=color:#ae81ff>0</span>:
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>break</span>
+</span></span><span style=display:flex><span>    file_name<span style=color:#f92672>.</span>write_text(json<span style=color:#f92672>.</span>dumps(res))
+</span></span></code></pre></div><p>E pra aplicar:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> wallabag.api.add_entry <span style=color:#f92672>import</span> AddEntry, Params <span style=color:#66d9ef>as</span> AddEntryParams
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> wallabag.entry <span style=color:#f92672>import</span> Entry
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> wallabag.config <span style=color:#f92672>import</span> Configs
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> pathlib <span style=color:#f92672>import</span> Path
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> json
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> concurrent.futures <span style=color:#f92672>import</span> ThreadPoolExecutor
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> tqdm <span style=color:#f92672>import</span> tqdm
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> random
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> sys
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> contextlib
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> io
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>pocket_fetched <span style=color:#f92672>=</span> Path(<span style=color:#e6db74>&#39;.&#39;</span>)<span style=color:#f92672>.</span>parent <span style=color:#f92672>/</span> <span style=color:#e6db74>&#34;pocket_fetched&#34;</span>
+</span></span><span style=display:flex><span>config_file <span style=color:#f92672>=</span> Path<span style=color:#f92672>.</span>home() <span style=color:#f92672>/</span> <span style=color:#e6db74>&#34;.config/wallabag-cli/config.ini&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>config <span style=color:#f92672>=</span> Configs(config_file)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>find_urls</span>():
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> bundle <span style=color:#f92672>in</span> pocket_fetched<span style=color:#f92672>.</span>glob(<span style=color:#e6db74>&#39;*.json&#39;</span>):
+</span></span><span style=display:flex><span>        data <span style=color:#f92672>=</span> json<span style=color:#f92672>.</span>loads(bundle<span style=color:#f92672>.</span>read_text())
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> data<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;error&#39;</span>) <span style=color:#f92672>is</span> <span style=color:#f92672>not</span> <span style=color:#66d9ef>None</span>:
+</span></span><span style=display:flex><span>            bundle<span style=color:#f92672>.</span>unlink()
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>continue</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> post <span style=color:#f92672>in</span> data[<span style=color:#e6db74>&#39;list&#39;</span>]<span style=color:#f92672>.</span>values():
+</span></span><span style=display:flex><span>            print(post)
+</span></span><span style=display:flex><span>            url <span style=color:#f92672>=</span> post<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;resolved_url&#39;</span>, post<span style=color:#f92672>.</span>get(<span style=color:#e6db74>&#39;given_url&#39;</span>))
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>if</span> url <span style=color:#f92672>is</span> <span style=color:#66d9ef>None</span>:
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>continue</span>
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>yield</span> AddEntry(config, url, {
+</span></span><span style=display:flex><span>                AddEntryParams<span style=color:#f92672>.</span>READ: post[<span style=color:#e6db74>&#39;status&#39;</span>] <span style=color:#f92672>==</span> <span style=color:#ae81ff>1</span>,
+</span></span><span style=display:flex><span>                AddEntryParams<span style=color:#f92672>.</span>TITLE: post[<span style=color:#e6db74>&#39;resolved_title&#39;</span>],
+</span></span><span style=display:flex><span>                AddEntryParams<span style=color:#f92672>.</span>STARRED: post[<span style=color:#e6db74>&#39;favorite&#39;</span>] <span style=color:#f92672>==</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>            })
+</span></span><span style=display:flex><span>    
+</span></span><span style=display:flex><span>data <span style=color:#f92672>=</span> find_urls()
+</span></span><span style=display:flex><span>data  <span style=color:#f92672>=</span> list(data)
+</span></span><span style=display:flex><span><span style=color:#75715e># print(data[:4])</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># exit(0)</span>
+</span></span><span style=display:flex><span>random<span style=color:#f92672>.</span>shuffle(data)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>with</span> tqdm(total<span style=color:#f92672>=</span>len(data), desc<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Ingerindo artigos&#34;</span>, miniters<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>, file<span style=color:#f92672>=</span>sys<span style=color:#f92672>.</span>stdout) <span style=color:#66d9ef>as</span> ops:
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>ingest_once</span>(item):
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>try</span>:
+</span></span><span style=display:flex><span>            ops<span style=color:#f92672>.</span>update()
+</span></span><span style=display:flex><span>            ops<span style=color:#f92672>.</span>refresh(nolock<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>            sys<span style=color:#f92672>.</span>stdout<span style=color:#f92672>.</span>flush()
+</span></span><span style=display:flex><span>            entry <span style=color:#f92672>=</span> item<span style=color:#f92672>.</span>request()<span style=color:#f92672>.</span>response
+</span></span><span style=display:flex><span>            entry <span style=color:#f92672>=</span> Entry(entry)
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> entry
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>except</span> <span style=color:#a6e22e>Exception</span> <span style=color:#66d9ef>as</span> e:
+</span></span><span style=display:flex><span>            <span style=color:#75715e># pass</span>
+</span></span><span style=display:flex><span>            print(e, file<span style=color:#f92672>=</span>sys<span style=color:#f92672>.</span>stdout)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>with</span> ThreadPoolExecutor(max_workers<span style=color:#f92672>=</span><span style=color:#ae81ff>16</span>) <span style=color:#66d9ef>as</span> tp:
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> item <span style=color:#f92672>in</span> tp<span style=color:#f92672>.</span>map(ingest_once, data):
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>pass</span>
+</span></span><span style=display:flex><span>            <span style=color:#75715e># if item is not None:</span>
+</span></span><span style=display:flex><span>            <span style=color:#75715e>#     ops.set_description(f&#34;Ingerido {item.url}&#34;)</span>
+</span></span><span style=display:flex><span>    print(folders)
+</span></span></code></pre></div><p>E para fazer ingestão do Instapaper</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span>  
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> wallabag.api.add_entry <span style=color:#f92672>import</span> AddEntry, Params <span style=color:#66d9ef>as</span> AddEntryParams
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> wallabag.entry <span style=color:#f92672>import</span> Entry
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> wallabag.config <span style=color:#f92672>import</span> Configs
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> pathlib <span style=color:#f92672>import</span> Path
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> csv
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> concurrent.futures <span style=color:#f92672>import</span> ThreadPoolExecutor
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> tqdm <span style=color:#f92672>import</span> tqdm
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> random
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> sys
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> contextlib
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> io
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>config_file <span style=color:#f92672>=</span> Path<span style=color:#f92672>.</span>home() <span style=color:#f92672>/</span> <span style=color:#e6db74>&#34;.config/wallabag-cli/config.ini&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>config <span style=color:#f92672>=</span> Configs(config_file)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>url <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;https://google.com&#34;</span>
+</span></span><span style=display:flex><span>starred <span style=color:#f92672>=</span> <span style=color:#66d9ef>False</span>
+</span></span><span style=display:flex><span>read <span style=color:#f92672>=</span> <span style=color:#66d9ef>False</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># print(entry)</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>folders <span style=color:#f92672>=</span> set()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>with</span> open(<span style=color:#e6db74>&#34;instapaper-export.csv&#34;</span>, <span style=color:#e6db74>&#39;r&#39;</span>) <span style=color:#66d9ef>as</span> f:
+</span></span><span style=display:flex><span>    data <span style=color:#f92672>=</span> csv<span style=color:#f92672>.</span>DictReader(f)
+</span></span><span style=display:flex><span>    data  <span style=color:#f92672>=</span> list(data)
+</span></span><span style=display:flex><span>    random<span style=color:#f92672>.</span>shuffle(data)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>with</span> tqdm(total<span style=color:#f92672>=</span>len(data), desc<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;Ingerindo artigos&#34;</span>, miniters<span style=color:#f92672>=</span><span style=color:#ae81ff>1</span>, file<span style=color:#f92672>=</span>sys<span style=color:#f92672>.</span>stdout) <span style=color:#66d9ef>as</span> ops:
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>ingest_once</span>(item):
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>try</span>:
+</span></span><span style=display:flex><span>                <span style=color:#75715e># print(&#39;item&#39;, item)</span>
+</span></span><span style=display:flex><span>                folder <span style=color:#f92672>=</span> item[<span style=color:#e6db74>&#39;Folder&#39;</span>]
+</span></span><span style=display:flex><span>                title <span style=color:#f92672>=</span> item[<span style=color:#e6db74>&#39;Title&#39;</span>]
+</span></span><span style=display:flex><span>                url <span style=color:#f92672>=</span> item[<span style=color:#e6db74>&#39;URL&#39;</span>]
+</span></span><span style=display:flex><span>                ops<span style=color:#f92672>.</span>update()
+</span></span><span style=display:flex><span>                ops<span style=color:#f92672>.</span>refresh(nolock<span style=color:#f92672>=</span><span style=color:#66d9ef>True</span>)
+</span></span><span style=display:flex><span>                sys<span style=color:#f92672>.</span>stdout<span style=color:#f92672>.</span>flush()
+</span></span><span style=display:flex><span>                entry <span style=color:#f92672>=</span> Entry(AddEntry(config, url, {
+</span></span><span style=display:flex><span>                    AddEntryParams<span style=color:#f92672>.</span>READ: folder <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;Archive&#39;</span>,
+</span></span><span style=display:flex><span>                    AddEntryParams<span style=color:#f92672>.</span>TITLE: title
+</span></span><span style=display:flex><span>                <span style=color:#75715e>#     AddEntryParams.STARRED: starred</span>
+</span></span><span style=display:flex><span>                })<span style=color:#f92672>.</span>request()<span style=color:#f92672>.</span>response)
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span> entry
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>except</span> <span style=color:#a6e22e>Exception</span> <span style=color:#66d9ef>as</span> e:
+</span></span><span style=display:flex><span>                <span style=color:#75715e># pass</span>
+</span></span><span style=display:flex><span>                print(e, file<span style=color:#f92672>=</span>sys<span style=color:#f92672>.</span>stdout)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>with</span> ThreadPoolExecutor(max_workers<span style=color:#f92672>=</span><span style=color:#ae81ff>16</span>) <span style=color:#66d9ef>as</span> tp:
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>for</span> item <span style=color:#f92672>in</span> tp<span style=color:#f92672>.</span>map(ingest_once, data):
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>pass</span>
+</span></span><span style=display:flex><span>                <span style=color:#75715e># if item is not None:</span>
+</span></span><span style=display:flex><span>                <span style=color:#75715e>#     ops.set_description(f&#34;Ingerido {item.url}&#34;)</span>
+</span></span><span style=display:flex><span>        print(folders)
+</span></span></code></pre></div><p>No total isso deu em 14449 artigos depois de rodar o comando de deduplicação de artigos da instância.</p><p>Tinha uma quantidade significativa de ids sem links no Pocket, provavelmente soft-deletes.</p></main></body>

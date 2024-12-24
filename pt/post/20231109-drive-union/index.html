@@ -1,0 +1,210 @@
+<!doctype html><html lang=pt dir=auto><head><meta charset=UTF-8><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><meta name=mdpath content="post/20231109-drive-union/index.pt.md"><title>offtopic do lucasew</title>
+<script src=https://unpkg.com/htmx.org@2.0.4 integrity=sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+ crossorigin=anonymous></script></head><body hx-boost=true><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/sakura.css/css/sakura.css type=text/css><style>nav{display:flex;justify-content:space-between}aside{border-bottom:1px solid gray}nav>div>a{margin-left:1rem}</style><header><nav><div><a href=/pt/home/><b>offtopic do lucasew</b></a></div><div><a href=/pt/post/>Publicações</a>
+<a href=/pt/post/20231109-drive-union/>🇧🇷</a></div></nav></header><hr><main><h1>Como agregar contas do drive?</h1><i>Também disponível em:
+<a target=_blank href=https://blog-do-lucao.vercel.app/post/20231109-drive-union/>[1]</a></i><br><h1 id=overview>Overview</h1><p>O Google Drive, apesar de ser lento feito a disgraça, é um jeito bem popular e barato de guardar arquivos,
+porém, ultimamente tá acontecendo bastante cortes de cota. Contas que eram ilimitadas não são mais. Dá para
+entender o motivo, o Google não é mais o que era, tá falindo e tá precisando monetizar onde
+dá, <a href="https://www.youtube.com/watch?v=_GARcKCaUfI" target=_blank rel=external>as vezes até dando tiros no próprio pé</a>.</p><p>Uma ferramenta muito popular em gerenciamento e operação de contas de armazenamento cloud de um jeito consistente
+é o <a href=https://rclone.org/ target=_blank rel=external>rclone</a>. É um negócio muito simples de instalar. É um binário que precisa estar em
+alguma pasta que pertence a variável de ambiente PATH. O rclone abstrai esses armários de armazenamento em remotes,
+cada remote tem um tipo, que é chamado de backend. Google Drive é um backend, tua conta do Google Drive é um remote.</p><p>Um remote, como já vou demonstrar, não precisa necessariamente ser um serviço em nuvem. Tem vários que
+encapsulam e agregam outros, como o <code>crypt</code>, o <code>chunker</code> e o que eu vou apresentar aqui: o <code>union</code>.</p><h2 id=union>Union</h2><p>O backend <a href=https://rclone.org/union/ target=_blank rel=external><code>union</code></a> junta vários remotes e monta uma visão simples deles.</p><p>O exemplo aqui que eu vou dar é com Google Drive mas esse esquema não só funciona com backends diferentes como
+também funciona entre remotes de diferentes backends.</p><p>Esse post não vai ser exaustivo sobre como usar o backend então se quiser aprender mais, leia a
+<a href=https://rclone.org/union/ target=_blank rel=external>documentação</a> e experimente.</p><h1 id=preparação-dos-remotes>Preparação dos remotes</h1><p>O arranjo que eu vou mostrar aqui consiste em duas contas e um union.</p><p>Vou dar o nome dos remotes <code>drive_rw</code> e <code>drive_ro</code>. O objetivo é usar o <code>drive_ro</code>, com menos cota, só para
+conferir se os arquivos existem e gerar um token do <code>drive_rw</code> que só dá permissão de gravação na conta e
+leitura do que foi gravado por esse token. Depois vou agregar com <code>union</code> de forma que <code>drive_rw</code> seja
+apenas usada para upar as coisas e a <code>drive_ro</code> só para ler.</p><h2 id=rclonecfg>rclone.cfg</h2><p>Toda parte de autenticação do rclone é salva em um arquivo. <strong>Passar esse arquivo para qualquer pessoa dá acesso
+a todas as contas definidas nesse arquivo para essa pessoa.</strong></p><p>Por padrão, o rclone salva esse arquivo de configuração em <code>~/.config/rclone/rclone.cfg</code> em basicamente qualquer
+sistema operacional. Você pode mudar esse caminho para um comando usando a flag <code>--config</code> e passando o novo caminho.</p><p>Para fins de demonstração eu vou usar <code>/tmp/rclone.cfg</code>.</p><h2 id=criação-do-remote-drive_ro>Criação do remote <code>drive_ro</code></h2><ul><li>Começa abrindo o <code>rclone config</code></li></ul><pre tabindex=0><code>lucasew@riverwood /tmp 0$ rclone config --config /tmp/rclone.cfg
+2023/11/09 10:39:40 NOTICE: Config file &#34;/tmp/rclone.cfg&#34; not found - using defaults
+No remotes found, make a new one?
+n) New remote
+s) Set configuration password
+q) Quit config
+n/s/q&gt; n
+
+Enter name for new remote.
+name&gt; drive_ro
+
+Option Storage.
+Type of storage to configure.
+Choose a number from below, or type in your own value.
+ 1 / 1Fichier
+   \ (fichier)
+ 2 / Akamai NetStorage
+   \ (netstorage)
+ 3 / Alias for an existing remote
+   \ (alias)
+ 4 / Amazon Drive
+   \ (amazon cloud drive)
+ 5 / Amazon S3 Compliant Storage Providers including AWS, Alibaba, ArvanCloud, Ceph, China Mobile, Cloudflare, GCS, DigitalOcean, Dreamhost, Huawei OBS, IBM COS, IDrive e2, IONOS Cloud, Leviia, Liara, Lyve Cloud, Minio, Netease, Petabox, RackCorp, Scaleway, SeaweedFS, StackPath, Storj, Synology, Tencent COS, Qiniu and Wasabi
+   \ (s3)
+ 6 / Backblaze B2
+   \ (b2)
+ 7 / Better checksums for other remotes
+   \ (hasher)
+ 8 / Box
+   \ (box)
+ 9 / Cache a remote
+   \ (cache)
+10 / Citrix Sharefile
+   \ (sharefile)
+11 / Combine several remotes into one
+   \ (combine)
+12 / Compress a remote
+   \ (compress)
+13 / Dropbox
+   \ (dropbox)
+14 / Encrypt/Decrypt a remote
+   \ (crypt)
+15 / Enterprise File Fabric
+   \ (filefabric)
+16 / FTP
+   \ (ftp)
+17 / Google Cloud Storage (this is not Google Drive)
+   \ (google cloud storage)
+18 / Google Drive
+   \ (drive)
+19 / Google Photos
+   \ (google photos)
+20 / HTTP
+   \ (http)
+21 / Hadoop distributed file system
+   \ (hdfs)
+22 / HiDrive
+   \ (hidrive)
+23 / In memory object storage system.
+   \ (memory)
+24 / Internet Archive
+   \ (internetarchive)
+25 / Jottacloud
+   \ (jottacloud)
+26 / Koofr, Digi Storage and other Koofr-compatible storage providers
+   \ (koofr)
+27 / Local Disk
+   \ (local)
+28 / Mail.ru Cloud
+   \ (mailru)
+29 / Mega
+   \ (mega)
+30 / Microsoft Azure Blob Storage
+   \ (azureblob)
+31 / Microsoft OneDrive
+   \ (onedrive)
+32 / OpenDrive
+   \ (opendrive)
+33 / OpenStack Swift (Rackspace Cloud Files, Blomp Cloud Storage, Memset Memstore, OVH)
+   \ (swift)
+34 / Oracle Cloud Infrastructure Object Storage
+   \ (oracleobjectstorage)
+35 / Pcloud
+   \ (pcloud)
+36 / PikPak
+   \ (pikpak)
+37 / Proton Drive
+   \ (protondrive)
+38 / Put.io
+   \ (putio)
+39 / QingCloud Object Storage
+   \ (qingstor)
+40 / Quatrix by Maytech
+   \ (quatrix)
+41 / SMB / CIFS
+   \ (smb)
+42 / SSH/SFTP
+   \ (sftp)
+43 / Sia Decentralized Cloud
+   \ (sia)
+44 / Storj Decentralized Cloud Storage
+   \ (storj)
+45 / Sugarsync
+   \ (sugarsync)
+46 / Transparently chunk/split large files
+   \ (chunker)
+47 / Union merges the contents of several upstream fs
+   \ (union)
+48 / Uptobox
+   \ (uptobox)
+49 / WebDAV
+   \ (webdav)
+50 / Yandex Disk
+   \ (yandex)
+51 / Zoho
+   \ (zoho)
+52 / premiumize.me
+   \ (premiumizeme)
+53 / seafile
+   \ (seafile)
+Storage&gt; drive
+
+Option client_id.
+Google Application Client Id
+Setting your own is recommended.
+See https://rclone.org/drive/#making-your-own-client-id for how to create your own.
+If you leave this blank, it will use an internal key which is low performance.
+Enter a value. Press Enter to leave empty.
+client_id&gt; 
+
+Option client_secret.
+OAuth Client Secret.
+Leave blank normally.
+Enter a value. Press Enter to leave empty.
+client_secret&gt; 
+
+Option scope.
+Scope that rclone should use when requesting access from drive.
+Choose a number from below, or type in your own value.
+Press Enter to leave empty.
+ 1 / Full access all files, excluding Application Data Folder.
+   \ (drive)
+ 2 / Read-only access to file metadata and file contents.
+   \ (drive.readonly)
+   / Access to files created by rclone only.
+ 3 | These are visible in the drive website.
+   | File authorization is revoked when the user deauthorizes the app.
+   \ (drive.file)
+   / Allows read and write access to the Application Data folder.
+ 4 | This is not visible in the drive website.
+   \ (drive.appfolder)
+   / Allows read-only access to file metadata but
+ 5 | does not allow any access to read or download file content.
+   \ (drive.metadata.readonly)
+scope&gt; drive.file
+
+Option service_account_file.
+Service Account Credentials JSON file path.
+Leave blank normally.
+Needed only if you want use SA instead of interactive login.
+Leading `~` will be expanded in the file name as will environment variables such as `${RCLONE_CONFIG_DIR}`.
+Enter a value. Press Enter to leave empty.
+service_account_file&gt; 
+
+Edit advanced config?
+y) Yes
+n) No (default)
+y/n&gt; n
+
+Use web browser to automatically authenticate rclone with remote?
+ * Say Y if the machine running rclone has a web browser you can use
+ * Say N if running rclone on a (remote) machine without web browser access
+If not sure try Y. If Y failed, try N.
+
+y) Yes (default)
+n) No
+y/n&gt; 
+
+2023/11/09 10:41:12 NOTICE: If your browser doesn&#39;t open automatically go to the following link: http://127.0.0.1:53682/auth?state=vascodagama
+2023/11/09 10:41:12 NOTICE: Log in and authorize rclone for access
+2023/11/09 10:41:12 NOTICE: Waiting for code...
+</code></pre><p><img src=/post/20231109-drive-union/drive_ro_auth.png alt></p><p>Nesse momento, uma aba do navegador vai surgir pedindo permissão. Quando você permitir ele vai te jogar para a seguinte tela:
+<img src=/post/20231109-drive-union/drive_ro_ok.png alt></p><p>Depois é só apertar enter duas vezes</p><ul><li>Uma pra confirmar que você não quer configurar um team drive</li><li>Outra pra confirmar que ele gerou as configurações corretamente</li></ul><p>E a primeira fase está pronta</p><h2 id=criação-do-remote-drive_rw>Criação do remote <code>drive_rw</code></h2><p>Na criação do remote <code>drive_rw</code>, o processo é quase igual.</p><p>A única diferença é que na parte do <code>scope</code>, onde você escolhe que
+permissões o remote vai ter na conta para depois autorizar você escolhe
+ou a &ldquo;Full access&rdquo; (<code>drive</code>) ou a Read-only access (<code>drive.readonly</code>).</p><p>Ai vai do teu gosto. Eu escolheria a <code>drive.readonly</code> já que não é pra
+gravar nada nessa conta mesmo.</p><h2 id=criação-do-remote-drive>Criação do remote <code>drive</code></h2><p>O remote <code>drive</code> é o union em si. Nessa parte acho que é mais fácil
+só copiar o código do config e colar no fim do rclone.cfg que foi gerado
+nos passos anteriores.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-ini data-lang=ini><span style=display:flex><span><span style=color:#66d9ef>[drive]</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>type</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>union</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>upstreams</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>drive_ro:/:ro drive_rw:/</span>
+</span></span></code></pre></div><p>Você pode tentar usar o <code>rclone config</code> mas se você chegou aqui é porque
+tá com pressa então só copia e muda os nomes se tiver usando outros nomes.</p><h1 id=manha-essencial-com-relação-ao-uso>Manha essencial com relação ao uso</h1><p>A pasta inicial das duas contas sempre vai ser diferente então é uma boa
+usar uma flag do rclone específica para o Google Drive: <a href=https://rclone.org/drive/#drive-root-folder-id target=_blank rel=external><code>--drive-root-folder-id</code></a>.</p><p>Exemplo: <a href="https://drive.google.com/drive/folders/1eswj2f04KgHay8d1HKWmrI2QqpxVMEeP?usp=sharing" target=_blank rel=external>https://drive.google.com/drive/folders/1eswj2f04KgHay8d1HKWmrI2QqpxVMEeP?usp=sharing</a></p><ul><li>ID = 1eswj2f04KgHay8d1HKWmrI2QqpxVMEeP</li><li>O que adicionar no comando: <code>--drive-root-folder-id 1eswj2f04KgHay8d1HKWmrI2QqpxVMEeP</code></li></ul><p><strong>Você vai sempre precisar passar essa flag</strong></p><p>E mais um detalhe: <strong>as duas contas precisam estar autorizadas na pasta que vai ser alterada/lida</strong>.</p></main></body>
