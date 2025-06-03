@@ -3,9 +3,6 @@
   <a href="https://lucasew.github.io">
     <img alt="blog" src="https://img.shields.io/badge/offtopic_do_lucão-ff4088?logo=Hugo&style=flat-square" />
   </a>
-  <a href="https://github.com/lucasew/flows/">
-    <img alt="actionsflow status" src="https://img.shields.io/github/workflow/status/lucasew/flows/Actionsflow?label=Actionsflow&logo=github&style=flat-square"/>
-  </a>
   <a href="https://t.me/canaldolucao">
      <img alt="my telegram channel" src="https://img.shields.io/static/v1?color=26A5E4&label=Telegram&message=canaldolucao&logo=telegram&style=flat-square" />
   </a>
