@@ -12,11 +12,7 @@
   <img src="https://img.shields.io/liberapay/patrons/lucasew.svg?logo=liberapay">
 </p>
 
+- Working on R&D in Computer Vision, mostly on tooling and data crunching.
 - I like to know why the things work the way they work and I don't trust nothing that I can't question about and get a satisfactory answer.
-- Duolingo user since 2015 :owl:
-- I like tools that work without a lot of manual {re,}configuration like Nix, AWK, Shell Script, AHK, Automate and Magisk.
-- I also program in a few more *normal* languages, mostly Python, TypeScript and Go.
-- Less is more.
-- Always learning. Sometimes I post about on Twitter and on my blog.
-
-![Top langs](https://github-readme-stats.vercel.app/api/top-langs?username=lucasew&show_icons=true&theme=transparent&hide_border=true&layout=compact&langs_count=10&size_weight=0.2&count_weight=0.2) ![README stats](https://github-readme-stats.vercel.app/api?username=lucasew&show=reviews&show_icons=true&theme=transparent&hide_border=true)
+- I try to not optimize what shouldn't exist. Less is more.
+- Always learning. Sometimes I post about on Twitter, my [Telegram channel (pt_BR)](https://t.me/canaldolucao) and on my blog.
