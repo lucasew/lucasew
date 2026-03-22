@@ -1,0 +1,1 @@
+- 2026-03-22: Cleaned out out-of-scope boilerplate files and initialized a minimal setup fitting Janitor constraints.
