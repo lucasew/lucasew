@@ -1,2 +1,1 @@
-- 2026-03-22: GitHub Actions workflow configuration (autorelease.yml) formatting
-  normalized by prettier to ensure standard code style and avoid diff noise.
+- 2026-03-22: Cleaned out out-of-scope boilerplate files and initialized a minimal setup fitting Janitor constraints.
