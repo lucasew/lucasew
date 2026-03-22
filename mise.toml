@@ -1,0 +1,13 @@
+[tools]
+node = "22.22.0"
+
+[tasks]
+install = "npm install"
+"lint:markdown" = "npx markdownlint-cli2 '**/*.md' '#node_modules'"
+"lint:prettier" = "npx prettier --check ."
+lint = { depends = ["lint:*"] }
+"fmt:prettier" = "npx prettier --write ."
+fmt = { depends = ["fmt:*"] }
+test = "echo 'No tests configured'"
+codegen = "echo 'No codegen configured'"
+ci = { depends = ["lint", "test"] }
