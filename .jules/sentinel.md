@@ -1,0 +1,2 @@
+- 2026-04-17: Hardcoded secret pattern - always look for credentials in config or source files.
+- 2026-04-17: [Medium] Sensitive info in logs - always sanitize context/metadata before reporting errors.
