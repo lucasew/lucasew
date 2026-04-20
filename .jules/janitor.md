@@ -1,0 +1,1 @@
+- 2026-04-20: Prefer standard Markdown syntax over inline HTML.
