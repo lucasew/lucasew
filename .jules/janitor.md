@@ -1,2 +1,3 @@
-- 2026-04-26: Fix YAML formatting issues via Prettier to maintain standard
-  styling conventions.
+# Janitor Journal
+
+- 2026-04-26: Fix markdown formatting issues to conform to standard practices.
