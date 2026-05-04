@@ -1,0 +1,6 @@
+[tools]
+node = "20.18.3"
+
+[tasks]
+ci = "npm test"
+test = "npm test"

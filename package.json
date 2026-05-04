@@ -1,0 +1,9 @@
+{
+  "name": "refactoring",
+  "version": "1.0.0",
+  "description": "Refactoring agent changes",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/"
+  }
+}
