@@ -1,22 +1,28 @@
-## IGNORE: Converting README.md HTML to Markdown
+## IGNORE: Repeated changes to the same file
 
-**- Pattern:** Replacing inline HTML tags with standard Markdown syntax in the README.
-**- Justification:** These changes are consistently rejected, indicating the HTML is intentionally used for specific layout and alignment (e.g., center alignment and shield grids).
-**- Files Affected:** `README.md`
+**- Pattern:** Submitting multiple PRs that attempt to implement the same feature or repeatedly modifying the same core files, such as the centralized error reporter.
+**- Justification:** Redundantly duplicating existing, pending work or generating boilerplate for issues already covered by open, mergeable PRs.
+**- Files Affected:** `src/core/errors/errorReporter.js`, `tests/errorReporter.test.js`, `mise.toml`, `package.json`
 
-## IGNORE: Committing Tooling or Bootstrap Artifacts
+## IGNORE: Specific formatting rules rejected
 
-**- Pattern:** Committing bootstrap scripts, downloaded binaries, or temporary tooling installers like `install-mise.sh`.
-**- Justification:** Setup scripts and temporary artifacts should be executed on the fly or added to `.gitignore`, not checked into version control.
-**- Files Affected:** `install-mise.sh`, tooling binaries
+**- Pattern:** Converting inline HTML to standard Markdown syntax in the README, or enforcing unprompted YAML/Markdown formatting changes.
+**- Justification:** The project intentionally uses HTML for specific layouts, and these formatting changes are consistently rejected.
+**- Files Affected:** `README.md`, `.jules/janitor.md`, `.prettierrc`, `.markdownlint.yaml`
 
-## IGNORE: Reimplementing Centralized Error Reporting
+## IGNORE: False positive vulnerabilities
 
-**- Pattern:** Creating a new centralized error reporting facade, repeatedly updating docstrings for it, or moving its location (e.g., to `src/core/errorReporter.js`).
-**- Justification:** Redundant duplication of pending/existing work. The error reporter is already specified to reside at `src/core/errors/errorReporter.js` and additional boilerplate PRs for it are being closed.
-**- Files Affected:** `src/core/errorReporter.js`, `src/core/errors/errorReporter.js`, `tests/errorReporter.test.js`
+**- Pattern:** Adding generic dictionary-based sanitization logic to hide sensitive keys in error reporter context/metadata.
+**- Justification:** These are treated as false positive security vulnerabilities and are closed without merging.
+**- Files Affected:** `src/core/errors/errorReporter.js`, `tests/errorReporter.test.js`
 
-## IGNORE: Initializing Sparse Directories with Boilerplate
+## IGNORE: Committing Tooling Artifacts
+
+**- Pattern:** Committing bootstrap scripts or temporary tooling installers like `install-mise.sh`.
+**- Justification:** Execution guardrails forbid modifying `install-mise.sh`. Setup scripts should not be checked into version control.
+**- Files Affected:** `install-mise.sh`
+
+## IGNORE: Initializing Sparse Directories
 
 **- Pattern:** Creating standard framework directories (like Hugo's `content/`, `layouts/`, `static/`) and populating them with `.gitkeep` files.
 **- Justification:** Pre-emptively creating sparse directory structures with placeholder files is treated as unnecessary boilerplate and rejected.
