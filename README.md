@@ -12,6 +12,15 @@
   <img src="https://img.shields.io/liberapay/patrons/lucasew.svg?logo=liberapay">
 </p>
 
+<div align="center">
+  <a href="https://commit-history.com/lucasew">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://commit-history.com/embed/lucasew?theme=dark" />
+      <img alt="lucasew's commit history" src="https://commit-history.com/embed/lucasew" />
+    </picture>
+  </a>
+</div>
+
 - Worked on R&D in Computer Vision, mostly on tooling and data crunching.
 - I like to know why the things work the way they work and I don't trust nothing that I can't question about and get a satisfactory answer.
 - I try to not optimize what shouldn't exist. Less is more. Isolate or eliminate chaos. I do consulting though.
