@@ -13,12 +13,17 @@
 </p>
 
 - Worked on R&D in Computer Vision, mostly on tooling and data crunching.
-- I like to know why the things work the way they work and I don't trust nothing that I can't question about and get a satisfactory answer.
-- I try to not optimize what shouldn't exist. Less is more. Isolate or eliminate chaos. I do consulting though.
-- Always learning something. Sometimes I post about on Twitter, my [Telegram channel (pt_BR)](https://t.me/canaldolucao) and on my blog.
-- Looking for technical challenges, not political ones. Have one? Tell me more on lucas@lew.tec.br!
+- I like to know why the things work the way they work and I don't trust nothing
+  that I can't question about and get a satisfactory answer.
+- I try to not optimize what shouldn't exist. Less is more. Isolate or eliminate
+  chaos. I do consulting though.
+- Always learning something. Sometimes I post about on Twitter, my
+  [Telegram channel (pt_BR)](https://t.me/canaldolucao) and on my blog.
+- Looking for technical challenges, not political ones. Have one?
+  Tell me more on lucas@lew.tec.br!
 
-- Graveyard (old repos that are there only for history purposes): https://github.com/orgs/lucasew-graveyard/repositories
+- Graveyard (old repos that are there only for history purposes):
+  https://github.com/orgs/lucasew-graveyard/repositories
 
 <div align="center">
   <a href="https://commit-history.com/lucasew">
