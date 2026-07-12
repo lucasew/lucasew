@@ -4,10 +4,16 @@
     <img alt="blog" src="https://img.shields.io/badge/offtopic_do_lucão-ff4088?logo=rss&style=flat-square" />
   </a>
   <a href="https://t.me/canaldolucao">
-     <img alt="my telegram channel" src="https://img.shields.io/static/v1?color=26A5E4&label=Telegram&message=canaldolucao&logo=telegram&style=flat-square" />
+     <img
+       alt="my telegram channel"
+       src="https://img.shields.io/static/v1?color=26A5E4&label=Telegram&message=canaldolucao&logo=telegram&style=flat-square"
+     />
   </a>
   <a href="https://github.com/lucasew">
-    <img alt="github followers" src="https://img.shields.io/github/followers/lucasew?color=181717&label=Followers&logo=github&style=flat-square" />
+    <img
+      alt="github followers"
+      src="https://img.shields.io/github/followers/lucasew?color=181717&label=Followers&logo=github&style=flat-square"
+    />
   </a>
   <img src="https://img.shields.io/liberapay/patrons/lucasew.svg?logo=liberapay">
 </p>
@@ -28,7 +34,10 @@
 <div align="center">
   <a href="https://commit-history.com/lucasew">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://commit-history.com/embed/lucasew?theme=dark" />
+      <source
+        media="(prefers-color-scheme: dark)"
+        srcset="https://commit-history.com/embed/lucasew?theme=dark"
+      />
       <img alt="lucasew's commit history" src="https://commit-history.com/embed/lucasew" />
     </picture>
   </a>
