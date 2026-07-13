@@ -15,7 +15,12 @@
       src="https://img.shields.io/github/followers/lucasew?color=181717&label=Followers&logo=github&style=flat-square"
     />
   </a>
-  <img src="https://img.shields.io/liberapay/patrons/lucasew.svg?logo=liberapay">
+  <a href="https://liberapay.com/lucasew">
+    <img
+      alt="liberapay patrons"
+      src="https://img.shields.io/liberapay/patrons/lucasew.svg?logo=liberapay&style=flat-square"
+    />
+  </a>
 </p>
 
 - Worked on R&D in Computer Vision, mostly on tooling and data crunching.
