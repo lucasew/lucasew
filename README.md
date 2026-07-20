@@ -31,10 +31,10 @@
 - Always learning something. Sometimes I post about on Twitter, my
   [Telegram channel (pt_BR)](https://t.me/canaldolucao) and on my blog.
 - Looking for technical challenges, not political ones. Have one?
-  Tell me more on lucas@lew.tec.br!
+  Tell me more on <lucas@lew.tec.br>!
 
 - Graveyard (old repos that are there only for history purposes):
-  https://github.com/orgs/lucasew-graveyard/repositories
+  <https://github.com/orgs/lucasew-graveyard/repositories>
 
 <div align="center">
   <a href="https://commit-history.com/lucasew">
