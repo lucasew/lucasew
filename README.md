@@ -1,7 +1,10 @@
 <h1 align="center">My name is Lucas Eduardo Wendt</h1>
 <p align="center">
   <a href="https://lucasew.github.io">
-    <img alt="blog" src="https://img.shields.io/badge/offtopic_do_lucão-ff4088?logo=rss&style=flat-square" />
+    <img
+      alt="blog"
+      src="https://img.shields.io/badge/offtopic_do_lucão-ff4088?logo=rss&style=flat-square"
+    />
   </a>
   <a href="https://t.me/canaldolucao">
      <img
@@ -43,7 +46,10 @@
         media="(prefers-color-scheme: dark)"
         srcset="https://commit-history.com/embed/lucasew?theme=dark"
       />
-      <img alt="lucasew's commit history" src="https://commit-history.com/embed/lucasew" />
+      <img
+        alt="lucasew's commit history"
+        src="https://commit-history.com/embed/lucasew"
+      />
     </picture>
   </a>
 </div>
