@@ -1,13 +1,16 @@
 <h1 align="center">My name is Lucas Eduardo Wendt</h1>
 <p align="center">
   <a href="https://lucasew.github.io">
-    <img alt="blog" src="https://img.shields.io/badge/offtopic_do_lucão-ff4088?logo=rss&style=flat-square" />
+    <img
+      alt="blog"
+      src="https://img.shields.io/badge/offtopic_do_lucão-ff4088?logo=rss&style=flat-square"
+    />
   </a>
   <a href="https://t.me/canaldolucao">
-     <img
-       alt="my telegram channel"
-       src="https://img.shields.io/static/v1?color=26A5E4&label=Telegram&message=canaldolucao&logo=telegram&style=flat-square"
-     />
+    <img
+      alt="my telegram channel"
+      src="https://img.shields.io/static/v1?color=26A5E4&label=Telegram&message=canaldolucao&logo=telegram&style=flat-square"
+    />
   </a>
   <a href="https://github.com/lucasew">
     <img
